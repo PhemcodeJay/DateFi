@@ -3,6 +3,7 @@ const Match = require('../models/Match');
 const User = require('../models/User');
 const Message = require('../models/Message');
 const auth = require('../middleware/auth');
+const { pool } = require('../config/database');
 const router = express.Router();
 
 // @route   POST /api/matches/like/:userId
@@ -35,10 +36,14 @@ router.post('/like/:userId', auth, async (req, res) => {
     match = await Match.create({ user1_id: req.user.id, user2_id: userId, status: 'pending' });
 
     // Check if the other user has already liked this user (mutual match)
-    const existingFromOther = await Match.findBetween(userId, req.user.id);
+    // Look for a match where the other user is user1 and current user is user2
+    const existingFromOther = await pool.query(`
+      SELECT * FROM matches 
+      WHERE user1_id = $1 AND user2_id = $2 AND status = 'pending'
+    `, [userId, req.user.id]);
 
-    if (existingFromOther) {
-      await Match.updateStatus(existingFromOther.id, 'matched');
+    if (existingFromOther.rows.length > 0) {
+      await Match.updateStatus(existingFromOther.rows[0].id, 'matched');
       await Match.updateStatus(match.id, 'matched');
       return res.json({ match: true, matchId: match.id });
     }

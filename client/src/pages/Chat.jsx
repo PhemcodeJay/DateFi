@@ -73,7 +73,7 @@ const Chat = () => {
   const loadMatchInfo = async () => {
     try {
       const res = await matchesAPI.getMatches();
-      const match = res.data.find(m => m.matchId === matchId);
+      const match = res.data.find(m => String(m.matchId) === String(matchId));
       if (match) {
         setMatchInfo(match);
       }
@@ -155,10 +155,10 @@ const Chat = () => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="max-w-4xl mx-auto space-y-4">
           {messages.map((message) => {
-            const isOwnMessage = message.sender._id === user._id;
+            const isOwnMessage = message.sender_id === user._id;
             return (
               <div
-                key={message._id}
+                key={message.id}
                 className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
               >
                 <div
@@ -170,7 +170,7 @@ const Chat = () => {
                 >
                   <p>{message.content}</p>
                   <p className={`text-xs mt-1 ${isOwnMessage ? 'text-white/70' : 'text-gray-500'}`}>
-                    {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>

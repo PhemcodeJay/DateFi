@@ -27,7 +27,7 @@ router.put('/me', auth, async (req, res) => {
 
 // @route   POST /api/profiles/photo
 // @desc    Upload profile photo
-router.post('/photo', auth, require('../middleware/upload').default.single('photo'), async (req, res) => {
+router.post('/photo', auth, require('../middleware/upload').single('photo'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });

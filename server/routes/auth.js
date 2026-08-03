@@ -60,7 +60,7 @@ router.post('/login', async (req, res) => {
 
 // @route   GET /api/auth/me
 // @desc    Get current user
-router.get('/me', require('../middleware/auth').default, async (req, res) => {
+router.get('/me', require('../middleware/auth'), async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) {

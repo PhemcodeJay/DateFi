@@ -1,10 +1,5 @@
 const jwt = require('jsonwebtoken');
-const io = require('socket.io')({
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
+const { Server } = require('socket.io');
 
 const authenticateSocket = (socket, next) => {
   const token = socket.handshake.auth.token;
@@ -23,6 +18,13 @@ const authenticateSocket = (socket, next) => {
 };
 
 const setupSocket = (server) => {
+  const io = new Server(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+    }
+  });
+
   io.use(authenticateSocket);
   
   io.on('connection', (socket) => {

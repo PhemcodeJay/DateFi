@@ -13,7 +13,6 @@ router.get('/:matchId', auth, async (req, res) => {
     const matchId = parseInt(req.params.matchId);
     
     // Verify match exists and user is part of it
-    const match = await Match.findBetween(req.user.id, req.user.id);
     const matchData = await pool.query(`
       SELECT * FROM matches 
       WHERE id = $1 AND (user1_id = $2 OR user2_id = $2)

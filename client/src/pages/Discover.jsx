@@ -29,7 +29,7 @@ const Discover = () => {
 
     const profile = profiles[currentIndex];
     try {
-      const res = await matchesAPI.like(profile._id);
+      const res = await matchesAPI.like(profile.id);
       if (res.data.match) {
         toast.success(`You matched with ${profile.name}! 🎉`);
       }
@@ -44,7 +44,7 @@ const Discover = () => {
 
     const profile = profiles[currentIndex];
     try {
-      await matchesAPI.pass(profile._id);
+      await matchesAPI.pass(profile.id);
       setCurrentIndex(prev => prev + 1);
     } catch (error) {
       toast.error('Failed to pass');

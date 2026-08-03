@@ -109,7 +109,7 @@ const Profile = () => {
                 <h2 className="text-2xl font-bold">{user?.name}</h2>
                 <p className="text-white/90">{user?.email}</p>
                 <span className="inline-block mt-2 bg-white/20 px-3 py-1 rounded-full text-sm">
-                  {user?.subscription?.plan?.toUpperCase()} PLAN
+                  {(user?.subscription_plan || 'free').toUpperCase()} PLAN
                 </span>
               </div>
             </div>

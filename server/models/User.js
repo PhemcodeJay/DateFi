@@ -126,31 +126,8 @@ const User = {
   // Get discoverable profiles
   getDiscoverable: async (currentUserId, preferences) => {
     let query = `
-      SELECT id, name, age, bio, photos, interests, location, created_at
-      FROM users
-      WHERE id != $1 
-        AND is_active = true
-    `;
-    
-    const values = [currentUserId];
-    let paramCount = 2;
-
-    // Filter by gender preference
-    if (preferences.gender && preferences.gender.length > 0) {
-      query += ` AND gender = ANY($${paramCount++})`;
-      values.push(preferences.gender);
-    }
-
-    // Filter by age range
-    if (preferences.ageMin || preferences.ageMax) {
-      query += ` AND age BETWEEN $${paramCount++} AND $${paramCount++}`;
-      values.push(preferences.ageMin || 18);
-      values.push(preferences.ageMax || 100);
-    }
-
-    // Exclude users already matched or passed
-    query = `
-      SELECT u.* FROM users u
+      SELECT u.id, u.name, u.age, u.bio, u.photos, u.interests, u.location, u.created_at
+      FROM users u
       WHERE u.id != $1 
         AND u.is_active = true
         AND u.id NOT IN (
@@ -159,8 +136,24 @@ const User = {
           WHERE user1_id = $1 OR user2_id = $1
         )
     `;
+    
+    const values = [currentUserId];
+    let paramCount = 2;
 
-    const result = await pool.query(query, [currentUserId]);
+    // Filter by gender preference
+    if (preferences.gender && preferences.gender.length > 0) {
+      query += ` AND u.gender = ANY($${paramCount++})`;
+      values.push(preferences.gender);
+    }
+
+    // Filter by age range
+    if (preferences.ageMin || preferences.ageMax) {
+      query += ` AND u.age BETWEEN $${paramCount++} AND $${paramCount++}`;
+      values.push(preferences.ageMin || 18);
+      values.push(preferences.ageMax || 100);
+    }
+
+    const result = await pool.query(query, values);
     return result.rows;
   }
 };

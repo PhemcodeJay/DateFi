@@ -5,7 +5,7 @@ const router = express.Router();
 
 // @route   GET /api/chat/matches
 // @desc    Get all matches with last message
-router.get('/matches', require('../middleware/auth').default, async (req, res) => {
+router.get('/matches', require('../middleware/auth'), async (req, res) => {
   try {
     const { pool } = require('../config/database');
     
