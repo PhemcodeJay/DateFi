@@ -12,8 +12,31 @@ import Profile from './pages/Profile';
 import Navbar from './components/Navbar';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
+      </div>
+    );
+  }
+  
   return isAuthenticated ? children : <Navigate to="/login" />;
+};
+
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
+      </div>
+    );
+  }
+  
+  return isAuthenticated ? <Navigate to="/discover" /> : children;
 };
 
 const AppContent = () => {
@@ -24,8 +47,8 @@ const AppContent = () => {
       {isAuthenticated && <Navbar />}
       <Routes>
         <Route path="/" element={isAuthenticated ? <Navigate to="/discover" /> : <Landing />} />
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/discover" /> : <Login />} />
-        <Route path="/register" element={isAuthenticated ? <Navigate to="/discover" /> : <Register />} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
         <Route path="/profile-setup" element={
           <ProtectedRoute>
             <ProfileSetup />

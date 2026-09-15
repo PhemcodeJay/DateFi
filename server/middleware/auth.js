@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 
 const auth = async (req, res, next) => {
   try {
@@ -10,15 +9,15 @@ const auth = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
     
-    if (!user) {
-      return res.status(401).json({ message: 'Token is not valid' });
-    }
-
-    req.user = user;
+    // Attach decoded user info from token (avoids DB hit on every request)
+    // The token contains the user id which is sufficient for most operations
+    req.user = { id: decoded.id };
     next();
   } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token has expired', expired: true });
+    }
     res.status(401).json({ message: 'Token is not valid' });
   }
 };

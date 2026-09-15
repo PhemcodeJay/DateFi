@@ -92,9 +92,7 @@ const Landing = () => {
   // Interactive hero background movement
   const handleMouseMove = (e) => {
     const { clientX, clientY } = e;
-    const x = (clientX / window.innerWidth - 0.5) * 20;
-    const y = (clientY / window.innerHeight - 0.5) * 20;
-    setMousePos({ x, y });
+    setMousePos({ x: clientX, y: clientY });
   };
 
   // Animated counter component
@@ -136,6 +134,26 @@ const Landing = () => {
       className="min-h-screen bg-gradient-to-br from-pink-500 via-purple-600 to-indigo-700 overflow-hidden"
       onMouseMove={handleMouseMove}
     >
+      {/* Top Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-4 bg-white/10 backdrop-blur-md border-b border-white/10">
+        <div className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+          DateFi
+        </div>
+        <div className="flex items-center space-x-3">
+          <Link
+            to="/login"
+            className="px-5 py-2 rounded-full font-semibold text-white hover:bg-white/10 transition-all duration-200"
+          >
+            Login
+          </Link>
+          <Link
+            to="/register"
+            className="px-5 py-2 rounded-full font-semibold bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:scale-105 transition-transform duration-200"
+          >
+            Register
+          </Link>
+        </div>
+      </nav>
       {/* Floating hearts animation */}
       <div className="fixed inset-0 pointer-events-none z-0">
         {hearts.map((heart) => (

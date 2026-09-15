@@ -3,15 +3,15 @@ const { pool } = require('../config/database');
 const Message = {
   // Create a message
   create: async (messageData) => {
-    const { match_id, sender_id, content } = messageData;
+    const { match_id, sender_id, content, message_type = 'text', media_url = null } = messageData;
     
     const query = `
-      INSERT INTO messages (match_id, sender_id, content)
-      VALUES ($1, $2, $3)
+      INSERT INTO messages (match_id, sender_id, content, message_type, media_url)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *
     `;
     
-    const values = [match_id, sender_id, content];
+    const values = [match_id, sender_id, content, message_type, media_url];
     const result = await pool.query(query, values);
     return result.rows[0];
   },

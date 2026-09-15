@@ -21,7 +21,8 @@ router.put('/me', auth, async (req, res) => {
     const user = await User.updateProfile(req.user.id, updates);
     res.json(user);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Update profile error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -68,7 +69,8 @@ router.get('/discover', auth, async (req, res) => {
     
     res.json(profiles);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Discover profiles error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

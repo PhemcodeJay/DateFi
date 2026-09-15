@@ -1,6 +1,9 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { registerValidation, loginValidation } = require('../middleware/validate');
+const { authLimiter } = require('../middleware/rateLimiter');
+const { pool } = require('../config/database');
 const router = express.Router();
 
 const generateToken = (id) => {
@@ -9,7 +12,7 @@ const generateToken = (id) => {
 
 // @route   POST /api/auth/register
 // @desc    Register user
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, registerValidation, async (req, res) => {
   try {
     const { email, password, name, age, gender } = req.body;
 
@@ -24,16 +27,23 @@ router.post('/register', async (req, res) => {
       _id: user.id,
       email: user.email,
       name: user.name,
+      age: user.age,
+      gender: user.gender,
+      bio: user.bio || '',
+      photos: user.photos || [],
+      preferences: user.preferences || {},
+      interests: user.interests || [],
       token: generateToken(user.id)
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Server error during registration' });
   }
 });
 
 // @route   POST /api/auth/login
 // @desc    Login user
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, loginValidation, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -51,10 +61,17 @@ router.post('/login', async (req, res) => {
       _id: user.id,
       email: user.email,
       name: user.name,
+      age: user.age,
+      gender: user.gender,
+      bio: user.bio || '',
+      photos: user.photos || [],
+      preferences: user.preferences || {},
+      interests: user.interests || [],
       token: generateToken(user.id)
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error during login' });
   }
 });
 
@@ -73,7 +90,7 @@ router.get('/me', require('../middleware/auth'), async (req, res) => {
       name: user.name,
       age: user.age,
       gender: user.gender,
-      bio: user.bio,
+      bio: user.bio || '',
       photos: user.photos || [],
       preferences: user.preferences || {},
       interests: user.interests || [],
@@ -86,7 +103,60 @@ router.get('/me', require('../middleware/auth'), async (req, res) => {
       isVerified: user.is_verified
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Get user error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   POST /api/auth/demo-login
+// @desc    Demo login - returns demo user credentials
+router.post('/demo-login', async (req, res) => {
+  try {
+    const DEMO_EMAIL = 'demo@datefi.com';
+    
+    // Find demo user (should exist from seed)
+    let user = await User.findByEmail(DEMO_EMAIL);
+    
+    if (!user) {
+      return res.status(500).json({ message: 'Demo user not found. Please run seed script.' });
+    }
+
+    const token = generateToken(user.id);
+
+    res.json({
+      _id: user.id,
+      email: user.email,
+      name: user.name,
+      age: user.age,
+      gender: user.gender,
+      bio: user.bio || '',
+      photos: user.photos || [],
+      preferences: user.preferences || {},
+      interests: user.interests || [],
+      isDemo: true,
+      token
+    });
+  } catch (error) {
+    console.error('Demo login error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   POST /api/auth/refresh
+// @desc    Refresh token
+router.post('/refresh', require('../middleware/auth'), async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      token: generateToken(user.id)
+    });
+  } catch (error) {
+    console.error('Token refresh error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

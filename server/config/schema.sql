@@ -41,6 +41,8 @@ CREATE TABLE IF NOT EXISTS messages (
   match_id INTEGER NOT NULL REFERENCES matches(id) ON DELETE CASCADE,
   sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   content TEXT NOT NULL,
+  message_type VARCHAR(20) DEFAULT 'text' CHECK (message_type IN ('text', 'image', 'video')),
+  media_url TEXT,
   read BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

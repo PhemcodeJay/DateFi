@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authAPI } from '../utils/api';
 
 const AuthContext = createContext();
@@ -50,6 +50,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUser = useCallback((updates) => {
+    setUser(prev => ({ ...prev, ...updates }));
+  }, []);
+
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
@@ -60,12 +64,14 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    isAuthenticated: !!user
+    updateUser,
+    isAuthenticated: !!user,
+    loading
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

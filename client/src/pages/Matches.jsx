@@ -4,6 +4,8 @@ import { toast } from 'react-hot-toast';
 import { matchesAPI } from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 
+const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const Matches = () => {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +62,7 @@ const Matches = () => {
                 <div className="h-64 bg-gradient-to-br from-pink-400 to-purple-600">
                   {match.user.photos && match.user.photos.length > 0 ? (
                     <img
-                      src={`http://localhost:5000${match.user.photos[0]}`}
+                      src={`${baseUrl}${match.user.photos[0]}`}
                       alt={match.user.name}
                       className="w-full h-full object-cover"
                     />

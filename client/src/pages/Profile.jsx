@@ -4,16 +4,12 @@ import { profilesAPI } from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const Profile = () => {
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const [user, setUser] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    age: '',
-    bio: '',
-    interests: ''
-  });
+  const [formData, setFormData] = useState({ name: '', age: '', bio: '', interests: '' });
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { user: authUser, logout } = useAuth();
+  const { user: authUser } = useAuth();
 
   useEffect(() => {
     loadProfile();
@@ -89,6 +85,11 @@ const Profile = () => {
           <h1 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
             My Profile
           </h1>
+          {authUser?.email === 'demo@datefi.com' && (
+            <div className="bg-emerald-100 text-emerald-700 text-center py-2 px-4 rounded-lg mb-4 text-sm">
+              🚀 Demo account. <Link to="/register" className="underline font-semibold">Create real account</Link> to save data.
+            </div>
+          )}
           <p className="text-gray-600 text-center mb-8">Manage your profile settings</p>
 
           {/* User Info Card */}
@@ -97,7 +98,7 @@ const Profile = () => {
               <div className="w-20 h-20 rounded-full bg-white/20 overflow-hidden">
                 {photos.length > 0 ? (
                   <img
-                    src={`http://localhost:5000${photos[0]}`}
+                    src={`${baseUrl}${photos[0]}`}
                     alt={user?.name}
                     className="w-full h-full object-cover"
                   />
@@ -188,7 +189,7 @@ const Profile = () => {
                 {photos.map((photo, idx) => (
                   <div key={idx} className="relative">
                     <img
-                      src={`http://localhost:5000${photo}`}
+                    src={`${baseUrl}${photo}`}
                       alt="Profile"
                       className="w-full h-32 object-cover rounded-lg"
                     />

@@ -27,6 +27,16 @@ router.post('/like/:userId', auth, async (req, res) => {
       if ((match.user1_id == req.user.id && match.user2_id == userId) ||
           (match.user1_id == userId && match.user2_id == req.user.id)) {
         match = await Match.updateStatus(match.id, 'matched');
+        
+        // Emit match notification to both users
+        const io = req.app.get('io');
+        if (io) {
+          io.to(userId.toString()).emit('new_match', {
+            matchId: match.id,
+            userId: req.user.id
+          });
+        }
+        
         return res.json({ match: true, matchId: match.id });
       }
       return res.status(400).json({ message: 'Match already exists' });
@@ -36,7 +46,6 @@ router.post('/like/:userId', auth, async (req, res) => {
     match = await Match.create({ user1_id: req.user.id, user2_id: userId, status: 'pending' });
 
     // Check if the other user has already liked this user (mutual match)
-    // Look for a match where the other user is user1 and current user is user2
     const existingFromOther = await pool.query(`
       SELECT * FROM matches 
       WHERE user1_id = $1 AND user2_id = $2 AND status = 'pending'
@@ -45,12 +54,23 @@ router.post('/like/:userId', auth, async (req, res) => {
     if (existingFromOther.rows.length > 0) {
       await Match.updateStatus(existingFromOther.rows[0].id, 'matched');
       await Match.updateStatus(match.id, 'matched');
+      
+      // Emit match notification to both users
+      const io = req.app.get('io');
+      if (io) {
+        io.to(userId.toString()).emit('new_match', {
+          matchId: match.id,
+          userId: req.user.id
+        });
+      }
+      
       return res.json({ match: true, matchId: match.id });
     }
 
     res.json({ match: false, matchId: match.id });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Like user error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -81,14 +101,55 @@ router.get('/', auth, async (req, res) => {
         name: match.name,
         age: match.age,
         photos: match.photos || [],
-        bio: match.bio
+        bio: match.bio || ''
       },
       matchedAt: match.matched_at
     }));
 
     res.json(formattedMatches);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Get matches error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   GET /api/matches/:matchId/info
+// @desc    Get specific match info for chat header
+router.get('/:matchId/info', auth, async (req, res) => {
+  try {
+    const matchId = parseInt(req.params.matchId);
+    
+    const matchData = await pool.query(`
+      SELECT m.id as match_id,
+        CASE WHEN m.user1_id = $1 THEN u2.id ELSE u1.id END as other_user_id,
+        CASE WHEN m.user1_id = $1 THEN u2.name ELSE u1.name END as name,
+        CASE WHEN m.user1_id = $1 THEN u2.age ELSE u1.age END as age,
+        CASE WHEN m.user1_id = $1 THEN u2.photos ELSE u1.photos END as photos,
+        CASE WHEN m.user1_id = $1 THEN u2.bio ELSE u1.bio END as bio
+      FROM matches m
+      JOIN users u1 ON m.user1_id = u1.id
+      JOIN users u2 ON m.user2_id = u2.id
+      WHERE m.id = $2 AND (m.user1_id = $1 OR m.user2_id = $1) AND m.status = 'matched'
+    `, [req.user.id, matchId]);
+
+    if (matchData.rows.length === 0) {
+      return res.status(404).json({ message: 'Match not found' });
+    }
+
+    const match = matchData.rows[0];
+    res.json({
+      matchId: match.match_id,
+      user: {
+        _id: match.other_user_id,
+        name: match.name,
+        age: match.age,
+        photos: match.photos || [],
+        bio: match.bio || ''
+      }
+    });
+  } catch (error) {
+    console.error('Get match info error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -104,7 +165,8 @@ router.delete('/:matchId', auth, async (req, res) => {
 
     res.json({ message: 'Unmatched successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Unmatch error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

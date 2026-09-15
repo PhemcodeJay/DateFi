@@ -1,0 +1,18 @@
+[36mvite v4.5.14 [32mbuilding for production...[36m[39m
+transforming...
+(node:18612) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/Phemcode/Documents/Jobs/dating%20app/client/postcss.config.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to \\?\C:\Users\Phemcode\Documents\Jobs\dating app\client\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[32m✓[39m 132 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                 [39m[1m[2m  1.86 kB[22m[1m[22m[2m │ gzip:   0.74 kB[22m
+[2mdist/[22m[35massets/index-96d9a9fb.css  [39m[1m[2m 32.86 kB[22m[1m[22m[2m │ gzip:   5.65 kB[22m
+[2mdist/[22m[36massets/index-af834524.js   [39m[1m[33m689.34 kB[39m[22m[2m │ gzip: 192.40 kB[22m
+[33m
+(!) Some chunks are larger than 500 kBs after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 11.35s[39m
